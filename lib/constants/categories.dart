@@ -1,0 +1,42 @@
+import 'package:flutter/material.dart';
+
+final List<Map<String, dynamic>> expenseCategories = [
+  {'icon': Icons.celebration, 'label': 'party'},
+  {'icon': Icons.receipt_long, 'label': 'Bill'},
+  {'icon': Icons.shopping_cart, 'label': 'Shopping'},
+  {'icon': Icons.restaurant, 'label': 'Food'},
+  {'icon': Icons.phone_android, 'label': 'Phone'},
+  {'icon': Icons.movie, 'label': 'Entertainment'},
+  {'icon': Icons.school, 'label': 'Education'},
+  {'icon': Icons.face, 'label': 'Beauty'},
+  {'icon': Icons.pool, 'label': 'Sports'},
+  {'icon': Icons.people, 'label': 'Social'},
+  {'icon': Icons.directions_bus, 'label': 'Transportation'},
+  {'icon': Icons.checkroom, 'label': 'Clothing'},
+  {'icon': Icons.directions_car, 'label': 'Car'},
+  {'icon': Icons.local_bar, 'label': 'Alcohol'},
+  {'icon': Icons.smoking_rooms, 'label': 'Cigarettes'},
+  {'icon': Icons.headphones, 'label': 'Electronics'},
+  {'icon': Icons.flight, 'label': 'Travel'},
+  {'icon': Icons.medical_services, 'label': 'Health'},
+  {'icon': Icons.pets, 'label': 'Pets'},
+  {'icon': Icons.build, 'label': 'Repairs'},
+  {'icon': Icons.home_repair_service, 'label': 'Housing'},
+  {'icon': Icons.house, 'label': 'Home'},
+  {'icon': Icons.card_giftcard, 'label': 'Gifts'},
+  {'icon': Icons.favorite, 'label': 'Donations'},
+  {'icon': Icons.confirmation_number, 'label': 'Lottery'},
+  {'icon': Icons.fastfood, 'label': 'Snacks'},
+  {'icon': Icons.child_care, 'label': 'Kids'},
+  {'icon': Icons.eco, 'label': 'Vegetables'},
+  {'icon': Icons.apple, 'label': 'Fruits'},
+];
+
+final List<Map<String, dynamic>> incomeCategories = [
+  {'icon': Icons.money, 'label': 'Salary'},
+  {'icon': Icons.business_center, 'label': 'Business'},
+  {'icon': Icons.watch_later_outlined, 'label': 'Freelance'},
+  {'icon': Icons.attach_money, 'label': 'Investment'},
+  {'icon': Icons.card_giftcard, 'label': 'Gifts'},
+  {'icon': Icons.money_off, 'label': 'Other'},
+];
