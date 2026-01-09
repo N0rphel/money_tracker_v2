@@ -5,6 +5,8 @@ final ThemeData lightTheme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
     seedColor: Colors.teal,
     brightness: Brightness.light,
+    onPrimary: Colors.black,
+    onSurface: Colors.grey,
   ),
   appBarTheme: const AppBarTheme(
     backgroundColor: Color.fromARGB(255, 255, 206, 57),
@@ -19,6 +21,8 @@ final ThemeData darkTheme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
     seedColor: Colors.teal,
     brightness: Brightness.dark,
+    onPrimary: Colors.white,
+    onSurface: Colors.grey,
   ),
   appBarTheme: const AppBarTheme(
     backgroundColor: Color.fromARGB(255, 32, 32, 32),

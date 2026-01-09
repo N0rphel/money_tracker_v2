@@ -11,6 +11,8 @@ class AddRecordModal extends StatelessWidget {
       ),
       child: Container(
         padding: const EdgeInsets.all(20),
+        width: double.infinity,
+        height: double.infinity,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
