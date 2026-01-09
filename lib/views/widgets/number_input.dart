@@ -98,7 +98,7 @@ class _NumberInputBottomSheetState extends State<NumberInputBottomSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Theme.of(context).primaryColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -111,11 +111,16 @@ class _NumberInputBottomSheetState extends State<NumberInputBottomSheet> {
               children: [
                 Row(
                   children: [
-                    Icon(widget.icon, size: 24),
+                    Icon(
+                      widget.icon,
+                      size: 24,
+                      color: Theme.of(context).primaryColor,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       widget.category,
-                      style: const TextStyle(
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),

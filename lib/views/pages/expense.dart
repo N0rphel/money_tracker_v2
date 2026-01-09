@@ -88,7 +88,7 @@ class _AddExpenseState extends State<AddExpense> {
             decoration: BoxDecoration(
               color: isSelected
                   ? Theme.of(context).primaryColor
-                  : Colors.grey[100],
+                  : Colors.grey[200],
               shape: BoxShape.circle,
             ),
             child: AnimatedScale(
