@@ -26,85 +26,6 @@ class _NumberInputBottomSheetState extends State<NumberInputBottomSheet> {
   String notes = '';
   DateTime selectedDate = DateTime.now();
 
-  void _onNumberPressed(String number) {
-    setState(() {
-      if (amount == '0') {
-        amount = number;
-      } else {
-        amount += number;
-      }
-    });
-  }
-
-  void _onDecimalPressed() {
-    setState(() {
-      if (!amount.contains('.')) {
-        amount += '.';
-      }
-    });
-  }
-
-  void _onBackspace() {
-    setState(() {
-      if (amount.length > 1) {
-        amount = amount.substring(0, amount.length - 1);
-      } else {
-        amount = '0';
-      }
-    });
-  }
-
-  Future<void> _selectDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-    );
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-      });
-    }
-  }
-
-  void _saveExpense() {
-    final parsedAmount = double.tryParse(amount) ?? 0.0;
-    if (parsedAmount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid amount')),
-      );
-      return;
-    }
-
-    final newTransaction = TransactionModel(
-      id: const Uuid().v4(),
-      amount: widget.type == 'expense'
-          ? -parsedAmount
-          : parsedAmount, // negative for expense
-      date: selectedDate,
-      category: widget.category,
-      type: widget.type,
-      icon: widget.icon.toString(), // simple way (you can improve later)
-      notes: notes.isEmpty ? null : notes.trim(),
-    );
-
-    // Save via Provider
-    context.read<TransactionProvider>().addTransaction(newTransaction);
-
-    // Feedback + close
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${widget.type == 'expense' ? 'Expense' : 'Income'} saved!',
-        ),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-
-    Navigator.pop(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -304,6 +225,104 @@ class _NumberInputBottomSheetState extends State<NumberInputBottomSheet> {
           ),
         ),
       ),
+    );
+  }
+
+  void _onNumberPressed(String number) {
+    setState(() {
+      if (amount == '0') {
+        amount = number;
+      } else {
+        amount += number;
+      }
+    });
+  }
+
+  void _onDecimalPressed() {
+    setState(() {
+      if (!amount.contains('.')) {
+        amount += '.';
+      }
+    });
+  }
+
+  void _onBackspace() {
+    setState(() {
+      if (amount.length > 1) {
+        amount = amount.substring(0, amount.length - 1);
+      } else {
+        amount = '0';
+      }
+    });
+  }
+
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
+
+  void _saveExpense() {
+    final parsedAmount = double.tryParse(amount) ?? 0.0;
+    if (parsedAmount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid amount')),
+      );
+      return;
+    }
+
+    final newTransaction = TransactionModel(
+      id: const Uuid().v4(),
+      amount: parsedAmount,
+      date: selectedDate,
+      category: widget.category,
+      type: widget.type,
+      icon: widget.icon.toString(), // simple way (you can improve later)
+      notes: notes.isEmpty ? null : notes.trim(),
+    );
+
+    // Save via Provider
+    context.read<TransactionProvider>().addTransaction(newTransaction);
+
+    // Feedback + close
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${widget.type == 'expense' ? 'Expense' : 'Income'} saved!',
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    Navigator.pop(context);
+  }
+
+  IconData parseIconFromString(String? iconString) {
+    if (iconString == null || iconString.isEmpty) {
+      return Icons.monetization_on; // fallback
+    }
+
+    // Extract the hex part: "IconData(U+0E486)" → "0E486"
+    final hexMatch = RegExp(r'U\+([0-9a-fA-F]+)').firstMatch(iconString);
+    if (hexMatch == null) {
+      return Icons.question_mark;
+    }
+
+    final hexCode = hexMatch.group(1)!;
+    final codePoint = int.parse(hexCode, radix: 16);
+
+    return IconData(
+      codePoint,
+      fontFamily: 'MaterialIcons', // important!
+      fontPackage: null, // usually null for built-in Material icons
     );
   }
 }

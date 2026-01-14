@@ -53,11 +53,26 @@ class RecordsPage extends StatelessWidget {
   }
 
   IconData _getIconFromString(String? iconString) {
-    // Example: if icon is stored as "monetization_on" or codePoint
     if (iconString == null || iconString.isEmpty) {
       return Icons.monetization_on;
     }
     // More advanced: if you store icon name or code point
-    return Icons.monetization_on; // fallback
+    return parseIconFromString(iconString); // fallback
+  }
+
+  IconData parseIconFromString(String? iconString) {
+    if (iconString == null || iconString.isEmpty) {
+      return Icons.monetization_on; // fallback
+    }
+
+    final hexMatch = RegExp(r'U\+([0-9a-fA-F]+)').firstMatch(iconString);
+    if (hexMatch == null) {
+      return Icons.question_mark;
+    }
+
+    final hexCode = hexMatch.group(1)!;
+    final codePoint = int.parse(hexCode, radix: 16);
+
+    return IconData(codePoint, fontFamily: 'MaterialIcons', fontPackage: null);
   }
 }
