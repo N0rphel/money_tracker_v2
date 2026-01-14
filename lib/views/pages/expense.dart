@@ -23,7 +23,7 @@ class _AddExpenseState extends State<AddExpense> {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.grey[900],
           builder: (context) => NumberInputBottomSheet(
             category: label,
             icon: icon,

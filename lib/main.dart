@@ -1,60 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:money_tracker_v2/data/database.dart';
-import 'package:money_tracker_v2/data/providers.dart';
-import 'package:money_tracker_v2/modals/transaction.dart';
+import 'package:money_tracker_v2/data/transaction_repository.dart';
+import 'package:money_tracker_v2/data/transaction_provider.dart';
 import 'package:money_tracker_v2/views/theme/theme.dart';
 import 'package:money_tracker_v2/views/theme/theme_notifier.dart';
 import 'package:money_tracker_v2/views/widget_tree.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
+import 'package:sqflite/sqflite.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await AppDatabase.init();
+  Database db;
 
-  // await AppDatabase.debugTest();
-
-  // final provider = TransactionProvider();
-  // await provider.loadTransactions(); // Optional initial load
-
-  // // await provider.deleteOldDatabase();
-
-  // final tx = TransactionModel(
-  //   id: const Uuid().v4(),
-  //   amount: 999.0,
-  //   date: DateTime.now(),
-  //   category: 'Test Category',
-  //   type: 'income',
-  // );
-
-  // await provider.addTransaction(tx);
-  // print('After insert:');
-  // provider.transactions.forEach((t) {
-  //   print('${t.category}, ${t.amount}, ${t.type}, ${t.date}');
-  // });
-
-  // await provider.deleteTransaction(tx.id);
-  // print('After delete:');
-  // provider.transactions.forEach((t) {
-  //   print('${t.category}, ${t.amount}, ${t.type}, ${t.date}');
-  // });
-
-  // await provider.loadTransactions();
-  // print('After load:');
-  // provider.transactions.forEach((t) {
-  //   print('${t.category}, ${t.amount}, ${t.type}, ${t.date}');
-  // });
+  try {
+    db = await AppDatabase.database; // ← await here
+    debugPrint('Database ready for providers');
+  } catch (e) {
+    debugPrint('Fatal error: Unable to initialize database. $e');
+    // You could show an error screen instead of running the app
+    return;
+  }
 
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeNotifier()),
+
+        // Now safe - we pass the resolved Database instance
+        Provider.value(value: db),
+
+        Provider(create: (_) => TransactionRepository(db)),
+
         ChangeNotifierProvider(
-          create: (_) => ThemeNotifier(),
-        ), // existing theme
-        ChangeNotifierProvider(
-          create: (_) => TransactionProvider(),
-        ), // new transaction provider
+          create: (context) =>
+              TransactionProvider(context.read<TransactionRepository>()),
+        ),
       ],
       child: const MyApp(),
     ),

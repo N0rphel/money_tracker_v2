@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:money_tracker_v2/data/transaction_provider.dart';
+import 'package:money_tracker_v2/modals/transaction.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class NumberInputBottomSheet extends StatefulWidget {
   final String category;
@@ -65,18 +69,40 @@ class _NumberInputBottomSheetState extends State<NumberInputBottomSheet> {
   }
 
   void _saveExpense() {
-    final expense = {
-      'category': widget.category,
-      'amount': double.tryParse(amount) ?? 0.0,
-      'type': widget.type,
-      'notes': notes,
-      'date': selectedDate,
-    };
+    final parsedAmount = double.tryParse(amount) ?? 0.0;
+    if (parsedAmount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid amount')),
+      );
+      return;
+    }
 
-    // TODO: Save to your database/state management
-    print('Saving expense: $expense');
+    final newTransaction = TransactionModel(
+      id: const Uuid().v4(),
+      amount: widget.type == 'expense'
+          ? -parsedAmount
+          : parsedAmount, // negative for expense
+      date: selectedDate,
+      category: widget.category,
+      type: widget.type,
+      icon: widget.icon.toString(), // simple way (you can improve later)
+      notes: notes.isEmpty ? null : notes.trim(),
+    );
 
-    Navigator.pop(context, expense);
+    // Save via Provider
+    context.read<TransactionProvider>().addTransaction(newTransaction);
+
+    // Feedback + close
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${widget.type == 'expense' ? 'Expense' : 'Income'} saved!',
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    Navigator.pop(context);
   }
 
   @override
