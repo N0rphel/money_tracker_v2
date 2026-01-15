@@ -13,6 +13,20 @@ class TransactionProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  int _selectedYear = DateTime.now().year;
+  int _selectedMonth = DateTime.now().month;
+
+  // Getters
+  int get selectedYear => _selectedYear;
+  int get selectedMonth => _selectedMonth;
+
+  // Public method to change month/year (called from your AppBar)
+  void setSelectedMonthYear(int year, int month) {
+    _selectedYear = year;
+    _selectedMonth = month;
+    notifyListeners(); // ← important! UI will rebuild
+  }
+
   TransactionProvider(this._repository) {
     debugPrint('✅ TransactionProvider CREATED successfully!');
     loadTransactions();
@@ -47,5 +61,26 @@ class TransactionProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Map<DateTime, List<TransactionModel>> getDailyGroupedTransactions() {
+    final Map<DateTime, List<TransactionModel>> grouped = {};
+
+    for (final tx in _transactions) {
+      if (tx.date.year == _selectedYear && tx.date.month == _selectedMonth) {
+        final dateKey = DateTime(tx.date.year, tx.date.month, tx.date.day);
+        grouped.putIfAbsent(dateKey, () => []).add(tx);
+      }
+    }
+
+    // Sort dates descending (newest first)
+    final sortedKeys = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
+
+    final result = <DateTime, List<TransactionModel>>{};
+    for (var key in sortedKeys) {
+      result[key] = grouped[key]!;
+    }
+
+    return result;
   }
 }

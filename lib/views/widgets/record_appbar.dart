@@ -52,7 +52,7 @@ class _RecordAppbarState extends State<RecordAppbar> {
 
             final formatter = NumberFormat.currency(
               symbol: 'Nu.',
-              decimalDigits: 2,
+              decimalDigits: 1,
             );
 
             return Column(
@@ -100,6 +100,14 @@ class _RecordAppbarState extends State<RecordAppbar> {
                               selectedMonth = result['month']!;
                               selectedYear = result['year']!;
                             });
+
+                            Provider.of<TransactionProvider>(
+                              context,
+                              listen: false,
+                            ).setSelectedMonthYear(
+                              result['year']!,
+                              result['month']!,
+                            );
                           }
                         },
                         child: Column(

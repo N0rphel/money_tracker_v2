@@ -29,7 +29,7 @@ class TransactionCard extends StatelessWidget {
 
               child: Icon(
                 icon,
-                size: 38,
+                size: 24,
                 color: type == 'income' ? Colors.green : Colors.red,
               ),
             ),
