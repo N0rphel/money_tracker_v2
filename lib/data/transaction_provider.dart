@@ -16,15 +16,10 @@ class TransactionProvider extends ChangeNotifier {
   int _selectedYear = DateTime.now().year;
   int _selectedMonth = DateTime.now().month;
 
-  // Getters
-  int get selectedYear => _selectedYear;
-  int get selectedMonth => _selectedMonth;
-
-  // Public method to change month/year (called from your AppBar)
   void setSelectedMonthYear(int year, int month) {
     _selectedYear = year;
     _selectedMonth = month;
-    notifyListeners(); // ← important! UI will rebuild
+    notifyListeners(); //
   }
 
   TransactionProvider(this._repository) {
@@ -54,7 +49,7 @@ class TransactionProvider extends ChangeNotifier {
 
     try {
       await _repository.insertTransaction(transaction);
-      await loadTransactions(); // refresh the list automatically
+      await loadTransactions();
     } catch (e) {
       _errorMessage = e.toString();
     }
@@ -82,5 +77,39 @@ class TransactionProvider extends ChangeNotifier {
     }
 
     return result;
+  }
+
+  Future<void> updateTransaction(TransactionModel transaction) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.updateTransaction(transaction);
+      await loadTransactions();
+    } catch (e) {
+      _errorMessage = e.toString();
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> deleteTransaction(String id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.deleteTransaction(id);
+      _transactions.removeWhere((tx) => tx.id == id);
+      notifyListeners();
+
+      await loadTransactions();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+    _isLoading = false;
+    notifyListeners();
   }
 }

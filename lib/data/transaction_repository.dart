@@ -24,4 +24,17 @@ class TransactionRepository {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+
+  Future<void> updateTransaction(TransactionModel transaction) async {
+    await db.update(
+      'transactions',
+      transaction.toMap(),
+      where: 'id=?',
+      whereArgs: [transaction.id],
+    );
+  }
+
+  Future<void> deleteTransaction(String id) async {
+    await db.delete('transactions', where: 'id=?', whereArgs: [id]);
+  }
 }

@@ -56,13 +56,23 @@ class RecordsPage extends StatelessWidget {
                     DayHeader(date: date),
                     ...grouped[date]!.map(
                       (tx) => TransactionCard(
-                        icon: parseIconFromString(tx.icon),
-                        category: tx.category,
-                        type: tx.type,
-                        amount: tx.amount,
+                        transaction: tx, // ← pass full model
+                        onEdit: () {
+                          print(
+                            "Edit requested for transaction: ${tx.id} - ${tx.category} ${tx.amount}",
+                          );
+                          // Later → Navigator.push to edit screen
+                        },
+                        onDelete: () {
+                          Provider.of<TransactionProvider>(
+                            context,
+                            listen: false,
+                          ).deleteTransaction(tx.id!);
+                          print("Deleted transaction: ${tx.id}");
+                        },
                       ),
                     ),
-                    const Divider(height: 24),
+                    const Divider(height: 2),
                   ],
                 ]),
               );
@@ -71,21 +81,5 @@ class RecordsPage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  IconData parseIconFromString(String? iconString) {
-    if (iconString == null || iconString.isEmpty) {
-      return Icons.monetization_on; // fallback
-    }
-
-    final hexMatch = RegExp(r'U\+([0-9a-fA-F]+)').firstMatch(iconString);
-    if (hexMatch == null) {
-      return Icons.question_mark;
-    }
-
-    final hexCode = hexMatch.group(1)!;
-    final codePoint = int.parse(hexCode, radix: 16);
-
-    return IconData(codePoint, fontFamily: 'MaterialIcons', fontPackage: null);
   }
 }
