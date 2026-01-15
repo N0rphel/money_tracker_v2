@@ -15,49 +15,71 @@ class RecordsPage extends StatelessWidget {
         preferredSize: Size.fromHeight(102),
         child: RecordAppbar(),
       ),
-      body: Consumer<TransactionProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: CustomScrollView(
+        slivers: [
+          Consumer<TransactionProvider>(
+            builder: (context, provider, _) {
+              final grouped = provider.getDailyGroupedTransactions();
+              final dates = grouped.keys.toList();
 
-          if (provider.errorMessage != null) {
-            return Center(
-              child: Text(
-                'Error: ${provider.errorMessage}',
-                style: const TextStyle(color: Colors.red),
-              ),
-            );
-          }
+              if (provider.isLoading) {
+                return const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
 
-          if (provider.transactions.isEmpty) {
-            return const Center(child: Text('No transactions yet. Add some!'));
-          }
+              if (dates.isEmpty) {
+                return const SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.receipt_long_outlined,
+                          size: 64,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'No transactions yet this month',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
 
-          return ListView.builder(
-            itemCount: provider.transactions.length,
-            itemBuilder: (context, index) {
-              final tx = provider.transactions[index];
-
-              return TransactionCard(
-                icon: _getIconFromString(tx.icon), // helper function below
-                category: tx.category,
-                type: tx.type,
-                amount: tx.amount,
+              return SliverList(
+                delegate: SliverChildListDelegate([
+                  for (final date in dates) ...[
+                    DayHeader(date: date),
+                    ...grouped[date]!.map(
+                      (tx) => TransactionCard(
+                        transaction: tx, // ← pass full model
+                        onEdit: () {
+                          print(
+                            "Edit requested for transaction: ${tx.id} - ${tx.category} ${tx.amount}",
+                          );
+                          // Later → Navigator.push to edit screen
+                        },
+                        onDelete: () {
+                          Provider.of<TransactionProvider>(
+                            context,
+                            listen: false,
+                          ).deleteTransaction(tx.id!);
+                          print("Deleted transaction: ${tx.id}");
+                        },
+                      ),
+                    ),
+                    const Divider(height: 2),
+                  ],
+                ]),
               );
             },
-          );
-        },
+          ),
+        ],
       ),
     );
-  }
-
-  IconData _getIconFromString(String? iconString) {
-    // Example: if icon is stored as "monetization_on" or codePoint
-    if (iconString == null || iconString.isEmpty) {
-      return Icons.monetization_on;
-    }
-    // More advanced: if you store icon name or code point
-    return Icons.monetization_on; // fallback
   }
 }
