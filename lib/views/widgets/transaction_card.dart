@@ -23,8 +23,7 @@ class TransactionCard extends StatelessWidget {
       key: ValueKey(transaction.id),
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
-        extentRatio:
-            0.35, // how much to reveal (35% of width → two buttons nicely)
+        extentRatio: 0.4,
         children: [
           // Edit action
           SlidableAction(
