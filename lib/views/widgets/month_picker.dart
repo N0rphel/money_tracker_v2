@@ -18,7 +18,7 @@ class _MonthYearPickerSheetState extends State<MonthYearPickerSheet> {
   late int selectedYear;
   late int selectedMonth;
 
-  final List<String> months = [
+  final months = const [
     'January',
     'February',
     'March',
@@ -42,30 +42,17 @@ class _MonthYearPickerSheetState extends State<MonthYearPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.45,
+    return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Drag handle
-          Container(
-            width: 40,
-            height: 4,
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-
           Text(
             'Select Month & Year',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 24),
 
-          // Year selector
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -86,10 +73,11 @@ class _MonthYearPickerSheetState extends State<MonthYearPickerSheet> {
               ),
             ],
           ),
-          const SizedBox(height: 32),
 
-          // Month grid
-          Expanded(
+          const SizedBox(height: 24),
+
+          SizedBox(
+            height: 220,
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
@@ -103,9 +91,7 @@ class _MonthYearPickerSheetState extends State<MonthYearPickerSheet> {
                 final isSelected = month == selectedMonth;
 
                 return GestureDetector(
-                  onTap: () {
-                    setState(() => selectedMonth = month);
-                  },
+                  onTap: () => setState(() => selectedMonth = month),
                   child: Container(
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
@@ -131,7 +117,6 @@ class _MonthYearPickerSheetState extends State<MonthYearPickerSheet> {
 
           const SizedBox(height: 16),
 
-          // Confirm button
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [

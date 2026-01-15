@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:money_tracker_v2/views/widgets/date_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:money_tracker_v2/data/transaction_provider.dart';
+import 'package:money_tracker_v2/views/widgets/month_picker.dart';
 
 class RecordAppbar extends StatefulWidget {
   const RecordAppbar({super.key});
@@ -18,7 +18,6 @@ class _RecordAppbarState extends State<RecordAppbar> {
   @override
   void initState() {
     super.initState();
-    // Initialize with current date (or January 2026 as per your context)
     final now = DateTime.now();
     selectedMonth = now.month;
     selectedYear = now.year;
@@ -32,15 +31,12 @@ class _RecordAppbarState extends State<RecordAppbar> {
       elevation: 0,
       flexibleSpace: SafeArea(
         child: Consumer<TransactionProvider>(
-          builder: (context, provider, child) {
-            // Filter transactions for selected month & year only
+          builder: (context, provider, _) {
             final filteredTransactions = provider.transactions.where((tx) {
-              final txDate = tx.date;
-              return txDate.month == selectedMonth &&
-                  txDate.year == selectedYear;
+              return tx.date.month == selectedMonth &&
+                  tx.date.year == selectedYear;
             }).toList();
 
-            // Calculate totals
             double totalIncome = 0;
             double totalExpense = 0;
 
@@ -48,85 +44,67 @@ class _RecordAppbarState extends State<RecordAppbar> {
               if (tx.type == 'income') {
                 totalIncome += tx.amount;
               } else if (tx.type == 'expense') {
-                totalExpense += tx.amount
-                    .abs(); // handles negative values if any
+                totalExpense += tx.amount.abs();
               }
             }
 
-            final totalBalance = totalIncome - totalExpense;
+            final balance = totalIncome - totalExpense;
 
-            // Number formatting
-            final currencyFormat = NumberFormat.currency(
-              symbol: 'Nu. ',
-              decimalDigits: 0,
+            final formatter = NumberFormat.currency(
+              symbol: 'Nu.',
+              decimalDigits: 2,
             );
-
-            final incomeStr = currencyFormat.format(totalIncome);
-            final expenseStr = currencyFormat.format(totalExpense);
-            final balanceStr = currencyFormat.format(totalBalance);
 
             return Column(
               children: [
-                // Title row
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Money Tracker',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      ),
-                    ],
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    'Money Tracker',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
                   ),
                 ),
 
-                // Date selector + financial summary
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 2,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Year + Month (stacked vertically)
                       GestureDetector(
                         onTap: () async {
-                          final selected =
-                              await showModalBottomSheet<Map<String, int>>(
-                                context: context,
-                                isScrollControlled: true,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(20),
-                                  ),
+                          final result = await showDialog<Map<String, int>>(
+                            context: context,
+                            barrierDismissible: true,
+                            builder: (context) {
+                              return Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
-                                builder: (context) => MonthYearPickerSheet(
+                                insetPadding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                ),
+                                child: MonthYearPickerSheet(
                                   initialYear: selectedYear,
                                   initialMonth: selectedMonth,
                                 ),
                               );
+                            },
+                          );
 
-                          if (selected != null && mounted) {
+                          if (result != null && mounted) {
                             setState(() {
-                              selectedMonth = selected['month']!;
-                              selectedYear = selected['year']!;
+                              selectedMonth = result['month']!;
+                              selectedYear = result['year']!;
                             });
                           }
                         },
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Year (smaller, above)
                             Text(
                               '$selectedYear',
                               style: TextStyle(
@@ -137,15 +115,12 @@ class _RecordAppbarState extends State<RecordAppbar> {
                               ),
                             ),
                             const SizedBox(height: 2),
-                            // Month (bigger, with dropdown arrow)
                             Row(
-                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   DateFormat('MMMM').format(
                                     DateTime(selectedYear, selectedMonth),
                                   ),
-                                  // 'MMMM' = full month name, use 'MMM' for short
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
@@ -160,7 +135,6 @@ class _RecordAppbarState extends State<RecordAppbar> {
                                   color: Theme.of(
                                     context,
                                   ).colorScheme.onPrimary,
-                                  size: 28,
                                 ),
                               ],
                             ),
@@ -170,30 +144,27 @@ class _RecordAppbarState extends State<RecordAppbar> {
 
                       const Spacer(),
 
-                      // Financial summary items
-                      _buildSummaryItem(
+                      _summary(
                         'Expenses',
-                        expenseStr,
+                        formatter.format(totalExpense),
                         Theme.of(context).colorScheme.error,
-                        Theme.of(context).colorScheme.onPrimary,
+                        context,
                       ),
                       const SizedBox(width: 20),
-
-                      _buildSummaryItem(
+                      _summary(
                         'Income',
-                        incomeStr,
+                        formatter.format(totalIncome),
                         Theme.of(context).colorScheme.primary,
-                        Theme.of(context).colorScheme.onPrimary,
+                        context,
                       ),
                       const SizedBox(width: 20),
-
-                      _buildSummaryItem(
+                      _summary(
                         'Balance',
-                        balanceStr,
-                        totalBalance >= 0
+                        formatter.format(balance),
+                        balance >= 0
                             ? Theme.of(context).colorScheme.primary
                             : Theme.of(context).colorScheme.error,
-                        Theme.of(context).colorScheme.onPrimary,
+                        context,
                       ),
                     ],
                   ),
@@ -206,26 +177,31 @@ class _RecordAppbarState extends State<RecordAppbar> {
     );
   }
 
-  Widget _buildSummaryItem(
+  Widget _summary(
     String label,
     String value,
-    Color valueColor,
-    Color labelColor,
+    Color color,
+    BuildContext context,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 11, color: labelColor.withOpacity(0.85)),
+          style: TextStyle(
+            fontSize: 14,
+            color: Theme.of(
+              context,
+            ).colorScheme.onPrimary.withValues(alpha: 85.0),
+          ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
           style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: valueColor,
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: color,
           ),
         ),
       ],
